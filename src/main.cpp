@@ -1,10 +1,17 @@
 #include <SFML/Graphics.hpp>
+#include "crt.h"
+#include "loop.h"
+#include "mainapp.h"
 
 int main()
 {
-    auto window = sf::RenderWindow{ { 1920u, 1080u }, "CMake SFML Project" };
-    window.setFramerateLimit(144);
-
+    CLoop Loop;
+    CMainApp MainLoop(Loop);
+    auto window = sf::RenderWindow{ { 800u, 600u }, "CMake SFML Project" };
+    window.setFramerateLimit(60);
+    window.setVerticalSyncEnabled(true);
+    // Start Emulator Thread
+    Loop.Start();
     while (window.isOpen())
     {
         for (auto event = sf::Event{}; window.pollEvent(event);)
@@ -14,8 +21,7 @@ int main()
                 window.close();
             }
         }
-
-        window.clear();
-        window.display();
+        MainLoop.getCRT().RenderScreen(window);
     }
+    Loop.Stop();
 }
