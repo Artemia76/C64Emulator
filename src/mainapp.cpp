@@ -1,9 +1,9 @@
 #include <cinttypes>
 #include <iostream>
 #ifdef WIN32
-#include <Windows.h>
+#include <Windows.hpp>
 #endif
-#include "mainapp.h"
+#include "mainapp.hpp"
 
 /**
  * @brief Construct a new CMainApp::CMainApp object

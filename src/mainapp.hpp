@@ -1,8 +1,10 @@
-#pragma once
-#include "loop.h"
+#ifndef MAINAPP_HPP
+#define MAINAPP_HPP
+
+#include "loop.hpp"
 #include <chrono>
 #include <m6502/System.hpp>
-#include "crt.h"
+#include "crt.hpp"
 
 class CMainApp : public CProcessEvent
 {
@@ -20,3 +22,5 @@ class CMainApp : public CProcessEvent
     protected:
         void OnProcess(const period& pInterval);
 };
+
+#endif

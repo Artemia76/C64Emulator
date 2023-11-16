@@ -1,13 +1,13 @@
 #include <SFML/Graphics.hpp>
-#include "crt.h"
-#include "loop.h"
-#include "mainapp.h"
+#include "crt.hpp"
+#include "loop.hpp"
+#include "mainapp.hpp"
 
 int main()
 {
     CLoop Loop;
     CMainApp MainLoop(Loop);
-    auto window = sf::RenderWindow{ { 800u, 600u }, "CMake SFML Project" };
+    auto window = sf::RenderWindow{ { CRT_COL, CRT_LINES }, "CMake SFML Project" };
     window.setFramerateLimit(60);
     window.setVerticalSyncEnabled(true);
     // Start Emulator Thread

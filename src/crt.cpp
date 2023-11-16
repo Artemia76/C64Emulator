@@ -1,4 +1,4 @@
-#include "crt.h"
+#include "crt.hpp"
 
 CCRT::CCRT(m6502::Mem& pMem) : m_mem(pMem)
 {
@@ -34,6 +34,7 @@ CCRT::CCRT(m6502::Mem& pMem) : m_mem(pMem)
     VMA = R12;
     VMA = (R12 << 8) | R13;
     DISPEN = false;
+    X=Y=0;
     printf("VMA = %04X\n", VMA);
 }
 
@@ -50,31 +51,7 @@ void CCRT::Execute(s64 pTime)
         m_TimeCounter -=1000;
         Byte Char = m_mem[VMA];
 
-        //Counters
-        C0++;
-        if (C0 == R0) // = 63 Width of screen in char
-        {
-            C0 = 0;
-            C9++;
-            if (C9 == R9) // = 7 (CRT Char)
-            {
-                C9 = 0;
-                C4++;
-                if (C4 == R4) // = 38 Height of screen in char
-                {
-                    if (C5 == R5) // = 0 Additional scan line
-                    {
-                        C4 = 0;
-                        C5 = 0;
-                        VMA = (R12 << 8) | R13;
-                    }
-                    else
-                    {
-                        C5++;
-                    }
-                }
-            }
-        }
+        DISPEN = ( (C0 < R1) && ( C4 < R6)) ? true : false;
 
         //Horizontal Sync
         if (C0 == R2) // = 46 Start of HSync
@@ -107,6 +84,38 @@ void CCRT::Execute(s64 pTime)
                 VSYNC=false;
             }
         }
+
+        if (DISPEN)
+        {
+            VMA += 2 ;
+        }
+        //Counters
+        C0++;
+        if (C0 == R0) // = 63 Width of screen in char
+        {
+            C0 = 0;
+            C9++;
+            if (C9 == R9) // = 7 (CRT Char)
+            {
+                C9 = 0;
+                C4++;
+                if (C4 == R4) // = 38 Height of screen in char
+                {
+                    if (C5 == R5) // = 0 Additional scan line
+                    {
+                        C4 = 0;
+                        C5 = 0;
+                        VMA = (R12 << 8) | R13;
+                    }
+                    else
+                    {
+                        C5++;
+                    }
+                }
+            }
+        }
+
+        //Draw Pixel
     }
 }
 

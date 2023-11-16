@@ -1,4 +1,6 @@
-#pragma once
+#ifndef CRT_HPP
+#define CRT_HPP
+
 #include <m6502/System.hpp>
 #include <SFML/Graphics.hpp>
 #include <SFML/Graphics/Image.hpp>
@@ -6,8 +8,8 @@
 
 using namespace m6502;
 
-#define CRT_LINES 200
-#define CRT_COL 640
+#define CRT_LINES 312
+#define CRT_COL 512
 
 class CCRT
 {
@@ -53,6 +55,14 @@ class CCRT
 
         bool VSYNC; // VSync Signal
         bool HSYNC; // HSync Signal
+        
+        /**
+         * @brief Draw Border when off
+         *        Else Draw Video Memory
+         */
+        bool DISPEN;
+
+        Word X,Y;
 
     public:
         CCRT(Mem& pMem);
@@ -65,3 +75,5 @@ class CCRT
     void    Execute(s64 pTime);
     void    RenderScreen(sf::RenderWindow& pWindow); //Rendering one frame;
 };
+
+#endif

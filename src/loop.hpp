@@ -1,4 +1,5 @@
-#pragma once
+#ifndef LOOP_HPP
+#define LOOP_HPP
 
 #include <chrono>
 #include <thread>
@@ -55,3 +56,5 @@ class CLoop
     std::mutex      m_mutex;
     void            mainLoop();
 };
+
+#endif

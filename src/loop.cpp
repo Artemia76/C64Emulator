@@ -1,4 +1,4 @@
-#include "loop.h"
+#include "loop.hpp"
 #include <algorithm>
 
 CProcessEvent::CProcessEvent(CLoop& pParent) : m_parent(pParent)
