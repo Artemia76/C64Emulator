@@ -33,6 +33,7 @@ CCRT::CCRT(m6502::Mem& pMem) : m_mem(pMem)
     C5 = 0;
     VMA = R12;
     VMA = (R12 << 8) | R13;
+    DISPEN = false;
     printf("VMA = %04X\n", VMA);
 }
 
