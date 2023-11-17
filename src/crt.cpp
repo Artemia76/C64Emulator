@@ -1,6 +1,6 @@
 #include "crt.hpp"
 
-CCRT::CCRT(m6502::Mem& pMem) : m_mem(pMem)
+CCRT::CCRT(CBus& pBus) : CBusChip(pBus, 0xFFFF, 0)
 {
     m_video_mem = 0xC000;
     m_Video_Ptr = m_video_mem;
@@ -49,7 +49,7 @@ void CCRT::Execute(s64 pTime)
     if (m_TimeCounter >= 1000) // 1µSec 
     {
         m_TimeCounter -=1000;
-        Byte Char = m_mem[VMA];
+        Byte Char = OnReadBusData(VMA);
 
         DISPEN = ( (C0 < R1) && ( C4 < R6)) ? true : false;
 

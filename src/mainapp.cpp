@@ -1,7 +1,7 @@
 #include <cinttypes>
 #include <iostream>
 #ifdef WIN32
-#include <Windows.hpp>
+#include <Windows.h>
 #endif
 #include "mainapp.hpp"
 
@@ -9,7 +9,7 @@
  * @brief Construct a new CMainApp::CMainApp object
  * 
  */
-CMainApp::CMainApp(CLoop& pParent) : CProcessEvent(pParent), cpu(mem), crt(mem)
+CMainApp::CMainApp(CLoop& pParent) : CProcessEvent(pParent), mem(bus, 0x0000, 0x0000), cpu(bus), crt(bus)
 {
 #ifdef WIN32
     // Set console code page to UTF-8 so console known how to interpret string data

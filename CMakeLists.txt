@@ -22,17 +22,17 @@ set  (PROJECT_SOURCES
 
     source_group("src" FILES ${PROJECT_SOURCES})
 
-add_executable( SFMLProject ${PROJECT_SOURCES} )
+add_executable( C64Emu ${PROJECT_SOURCES} )
 
-target_link_libraries(SFMLProject PRIVATE sfml-graphics M6502Lib )
-target_compile_features(SFMLProject PRIVATE cxx_std_17)
+target_link_libraries(C64Emu PRIVATE sfml-graphics M6502Lib )
+target_compile_features(C64Emu PRIVATE cxx_std_17)
 
 if(WIN32)
     add_custom_command(
-        TARGET SFMLProject
+        TARGET C64Emu
         COMMENT "Copy OpenAL DLL"
-        PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${SFML_SOURCE_DIR}/extlibs/bin/$<IF:$<EQUAL:${CMAKE_SIZEOF_VOID_P},8>,x64,x86>/openal32.dll $<TARGET_FILE_DIR:SFMLProject>
+        PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${SFML_SOURCE_DIR}/extlibs/bin/$<IF:$<EQUAL:${CMAKE_SIZEOF_VOID_P},8>,x64,x86>/openal32.dll $<TARGET_FILE_DIR:C64Emu>
         VERBATIM)
 endif()
 
-install(TARGETS SFMLProject)
+install(TARGETS C64Emu)

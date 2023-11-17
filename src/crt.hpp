@@ -11,10 +11,9 @@ using namespace m6502;
 #define CRT_LINES 312
 #define CRT_COL 512
 
-class CCRT
+class CCRT : public CBusChip
 {
     private:
-        Mem& m_mem;
         Word m_video_mem;
         Word m_Video_Ptr;
         int m_mode; // Curent video mode
@@ -65,7 +64,7 @@ class CCRT
         Word X,Y;
 
     public:
-        CCRT(Mem& pMem);
+        CCRT(CBus& pBus);
         ~CCRT();
     /**
      * @brief Draw Screen during time given
