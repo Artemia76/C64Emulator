@@ -49,7 +49,7 @@ void CCRT::Execute(s64 pTime)
     if (m_TimeCounter >= 1000) // 1µSec 
     {
         m_TimeCounter -=1000;
-        Byte Char = OnReadBusData(VMA);
+        Byte Char = bus.readBusData(VMA);
 
         DISPEN = ( (C0 < R1) && ( C4 < R6)) ? true : false;
 

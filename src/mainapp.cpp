@@ -20,7 +20,7 @@ CMainApp::CMainApp(CLoop& pParent) : CProcessEvent(pParent), mem(bus, 0x0000, 0x
 #endif
     m_timePoint = hrc::now();
     using namespace m6502;
-	cpu.Reset( 0x4000 );
+	cpu.reset( 0x4000 );
    // when:
 	/*
 	* = $4000
@@ -33,8 +33,7 @@ CMainApp::CMainApp(CLoop& pParent) : CProcessEvent(pParent), mem(bus, 0x0000, 0x
 	Byte TestPrg[] = 
 		{ 0x00,0x40,0xA2,0x00,0xE8,0x4C,0x02,0x40 };
 
-	Word StartAddress = cpu.LoadPrg( TestPrg, sizeof(TestPrg) );
-	cpu.PC = StartAddress;
+	Word StartAddress = cpu.loadPrg( TestPrg, sizeof(TestPrg) );
 
     m_clock = 3; // Set Clock speed in MHz
 }
@@ -66,7 +65,7 @@ void CMainApp::OnProcess(const period& pInterval)
     while (ExpectedCycle > ExecutedCycle)
     {
         //We ask cpu execute next instruction, if it take more than 1 cycle, cpu return the number of cycles used
-        RealCycles = cpu.Execute( 1 );
+        RealCycles = cpu.execute( 1 );
         ExecutedCycle += RealCycles;
         TimeElapsed  =  RealCycles * Cycle_Time;
         crt.Execute(TimeElapsed);
