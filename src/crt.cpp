@@ -43,7 +43,22 @@ CCRT::CCRT(CBus& pBus, CLoop& pLoop) : CBusChip(pBus, 0xFFFF, 0), CProcessEvent(
         std::cout << "Error loading SFML Font" << std::endl;
     }
     _debug = false;
-    _clock = 4; // Set Clock speed in Hz
+    _clock = 1000000; // Set Clock speed in Hz
+    Byte R,V,B;
+    R=V=B=0;
+    for (Byte i=0 ; i< sizeof(PALETTE); i++)
+    {
+        PALETTE[i] = sf::Color(R,V,B);
+        if (R==0xFF && B==0xFF)
+        {
+            V+=0x7F;
+        }
+        if (B==0xFF) R+=0x7F;
+        if (B==0xFF) B=0;
+    }
+    PEN[0] = PALETTE[1];
+    PEN[1] = PALETTE[24];
+    PAPER = PALETTE[1];
 }
 
 CCRT::~CCRT()
@@ -118,6 +133,46 @@ void CCRT::Execute()
             }
         }
     }
+    //draw screen
+    X = C0 * 8;
+    Y = C4 * (R9+1) + C9;
+    sf::Color ColToDraw=PAPER;
+    for (Byte j = 0 ; j < 2; j++)
+    {
+        Byte Px = CBusChip::bus.readBusData(VMA+j);
+        switch (_mode)
+        {
+            case 2:
+            {
+                for (Byte i = 0 ; i <8; i++)
+                {
+                    ColToDraw = PEN[(Px >> i)&0x01];
+                    _screen.setPixel(X+(j*8)+i, Y,ColToDraw);
+                }
+            } break;
+            case 1:
+            {
+                for (Byte i = 0 ; i <4; i++)
+                {
+                    ColToDraw = PEN[(Px >> (i*2))&0x03];
+                    _screen.setPixel(X+(j*4)+i, Y,ColToDraw);
+                    _screen.setPixel(X+(j*4)+i+1, Y,ColToDraw);
+                }
+            } break;
+            default:
+            {
+                for (Byte i = 0 ; i <2; i++)
+                {
+                    ColToDraw = PEN[(Px >> (i*4))&0x0F];
+                    _screen.setPixel(X+(j*8)+i, Y,ColToDraw);
+                    _screen.setPixel(X+(j*8)+i+1, Y,ColToDraw);
+                    _screen.setPixel(X+(j*8)+i+2, Y,ColToDraw);
+                    _screen.setPixel(X+(j*8)+i+3, Y,ColToDraw);
+                }
+
+            }
+        }
+    }
 }
 
 void CCRT::RenderScreen(sf::RenderWindow& pWindow)
@@ -167,7 +222,17 @@ void CCRT::RenderScreen(sf::RenderWindow& pWindow)
  */
 void CCRT::onProcess(const period& pInterval)
 {
-    Execute();
+    using namespace m6502;
+    std::int64_t Interval = std::chrono::duration_cast<std::chrono::microseconds>(pInterval).count();
+    // Compute how much clock cycle to do in interval
+    std::int64_t ExpectedCycle = static_cast<double>(_clock/1000000.0) * Interval;
+    if (ExpectedCycle < 1) ExpectedCycle = 1;
+    while (ExpectedCycle > 0)
+    {
+        //Execute 1 clock cycle 
+        Execute();
+        ExpectedCycle--;
+    }
 }
 
 void CCRT::setDebug (bool pDebug)

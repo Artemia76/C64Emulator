@@ -47,6 +47,9 @@ protected:
     void onProcess(const period& pInterval);
 
 private:
+    sf::Color PALETTE[27];
+    sf::Color PEN[16];
+    sf::Color PAPER;
     bool _debug;
     Word _videoMem;
     Word _videoPtr;

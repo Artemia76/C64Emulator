@@ -35,7 +35,7 @@ CMainApp::CMainApp(CLoop& pParent) : CProcessEvent(pParent), _mem(_bus, 0x0000, 
 
 	Word StartAddress = _cpu.loadPrg( TestPrg, sizeof(TestPrg) );
 
-    _clock = 4000000; // Set Clock speed in Hz
+    _clock = 3000000; // Set Clock speed in Hz
     _crt.setDebug(true);
 }
 
@@ -55,19 +55,13 @@ CMainApp::~CMainApp()
 void CMainApp::onProcess(const period& pInterval)
 {
     using namespace m6502;
-    std::int64_t RealCycles=0;
     hrc::time_point start = hrc::now();
     std::int64_t Interval = std::chrono::duration_cast<std::chrono::microseconds>(pInterval).count();
     // Compute how much clock cycle to do in interval
     std::int64_t ExpectedCycle = static_cast<double>(_clock/1000000.0) * Interval;
     std::int64_t ExecutedCycle = 0;
     std::int64_t Cycle_Time = std::chrono::nanoseconds((Interval*1000) / ExpectedCycle).count();
-    while (ExpectedCycle > ExecutedCycle)
-    {
-        //We ask cpu execute next instruction, if it take more than 1 cycle, cpu return the number of cycles used
-        RealCycles = _cpu.execute( 1 );
-        ExecutedCycle += RealCycles;
-    }
+    ExecutedCycle = _cpu.execute( ExpectedCycle );
     hrc::time_point end = hrc::now();
     std::int64_t ExecTime = std::chrono::duration_cast<std::chrono::microseconds>(end-start).count();
 
