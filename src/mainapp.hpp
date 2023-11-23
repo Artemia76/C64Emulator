@@ -8,20 +8,26 @@
 
 class CMainApp : public CProcessEvent
 {
-    public:
-        CMainApp (CLoop& pParent);
-        ~CMainApp ();
-        CCRT& getCRT();
-    private:
-        hrc::time_point m_timePoint;
-        m6502::CBus bus;
-	    m6502::CMem mem;
-	    m6502::CCPU cpu;
-        CCRT crt; // CRT Screen Emulator
-        int m_clock; // Clock in Mhz
+public:
+    CMainApp (CLoop& pParent);
+    ~CMainApp ();
+    CCRT& getCRT();
 
-    protected:
-        void OnProcess(const period& pInterval);
+protected:
+    /**
+     * @brief Process Event loop callback
+     * 
+     * @param pInterval : Period of loop
+     */
+    void onProcess(const period& pInterval);
+
+private:
+    hrc::time_point _timePoint;
+    m6502::CBus _bus;
+    m6502::CMem _mem;
+    m6502::CCPU _cpu;
+    CCRT _crt; // CRT Screen Emulator
+    m6502::u64 _clock; // Clock in Hz
 };
 
 #endif

@@ -1,9 +1,11 @@
 #ifndef CRT_HPP
 #define CRT_HPP
 
+#include "loop.hpp"
 #include <m6502/System.hpp>
 #include <SFML/Graphics.hpp>
 #include <SFML/Graphics/Image.hpp>
+#include <SFML/Graphics/Font.hpp>
 #include <mutex>
 
 using namespace m6502;
@@ -11,68 +13,220 @@ using namespace m6502;
 #define CRT_LINES 312
 #define CRT_COL 512
 
-class CCRT : public CBusChip
+/**
+ * @brief Emulate CRTC 6845 and CRT Display
+ * 
+ */
+class CCRT : public CBusChip, CProcessEvent
 {
-    private:
-        Word m_video_mem;
-        Word m_Video_Ptr;
-        int m_mode; // Curent video mode
-        sf::Image m_screen;
-
-        int m_line; // Actual line
-        int m_col; // Actual column
-        std::mutex m_mutex; // Lock thread access
-        s64 m_TimeCounter; // Counter of emaulated time
-
-        Byte R0; // Horizontal total character number
-        Byte R1; // Horizontal displayed character number
-        Byte R2; // Position of horizontal sync. Pulse
-        Byte R3; // Pulse width of horizontal sync. pulse
-        Byte R4; // Vertical total character number
-        Byte R5; // Total raster adjust
-        Byte R6; // Vertical displayed character number
-        Byte R7; // Position of vertical sync. Pulse
-        Byte R8; // Interlace Mode and Skew
-        Byte R9; // Max Scan Line Address
-        Byte R10; // Cursor start
-        Byte R11; // Cursor end
-        Byte R12; // Display start address (High)
-        Byte R13; // Display start adress (Low)
-        Byte R14; // Cursor address (High)
-        Byte R15; // Cursor address (Low)
-        Byte R16; // Light pen (High)
-        Byte R17; // Light pen (Low)
-
-        Byte C0; // HCC (Horizontal Char Counter)
-        Byte C9; // VLC (Vertical Line Counter)
-        Byte C4; // VCC (Vertical Character Counter)
-        Byte C3v; // VSC (Vertical Sync Counter)
-        Byte C3h; // HSC (Horizontal Sync Counter)
-        Byte C5; // VTAC (Vertical Total Adjust Counter)
-        Word VMA; // Byte Pointer
-        Word VMA2; // Byte Pointer
-
-        bool VSYNC; // VSync Signal
-        bool HSYNC; // HSync Signal
-        
-        /**
-         * @brief Draw Border when off
-         *        Else Draw Video Memory
-         */
-        bool DISPEN;
-
-        Word X,Y;
-
-    public:
-        CCRT(CBus& pBus);
-        ~CCRT();
+public:
+    CCRT(CBus& pBus, CLoop& pLoop);
+    ~CCRT();
+    
     /**
      * @brief Draw Screen during time given
      * 
-     * @param pTime 
      */
-    void    Execute(s64 pTime);
-    void    RenderScreen(sf::RenderWindow& pWindow); //Rendering one frame;
+    void Execute();
+
+    /**
+     * @brief Rendering one frame
+     * 
+     * @param pWindow 
+     */
+    void RenderScreen(sf::RenderWindow& pWindow);
+
+    void setDebug (bool pDebug = false);
+
+protected:
+    /**
+     * @brief Process Event loop callback
+     * 
+     * @param pInterval : Period of loop
+     */
+    void onProcess(const period& pInterval);
+
+private:
+    bool _debug;
+    Word _videoMem;
+    Word _videoPtr;
+    int _mode; // Curent video mode
+    sf::Image _screen;
+    sf::Font _font;
+
+    int _line; // Actual line
+    int _col; // Actual column
+    std::mutex _mutex; // Lock thread access
+    s64 _timeCounter; // Counter of emaulated time
+    m6502::u64 _clock; // Clock in Hz
+    /**
+     * @brief Horizontal total character number
+     * 
+     */
+    Byte R0;
+
+    /**
+     * @brief Horizontal displayed character number
+     * 
+     */
+    Byte R1;
+
+    /**
+     * @brief Position of horizontal sync. Pulse
+     * 
+     */
+    Byte R2;
+
+    /**
+     * @brief Pulse width of horizontal sync. pulse
+     * 
+     */
+    Byte R3;
+
+    /**
+     * @brief Vertical total character number
+     * 
+     */
+    Byte R4;
+
+    /**
+     * @brief Total raster adjust
+     * 
+     */
+    Byte R5;
+
+    /**
+     * @brief Vertical displayed character number
+     * 
+     */
+    Byte R6;
+
+    /**
+     * @brief Position of vertical sync. Pulse
+     * 
+     */
+    Byte R7;
+
+    /**
+     * @brief Interlace Mode and Skew
+     * 
+     */
+    Byte R8;
+
+    /**
+     * @brief Max Scan Line Address
+     * 
+     */
+    Byte R9;
+
+    /**
+     * @brief Cursor start
+     * 
+     */
+    Byte R10;
+
+    /**
+     * @brief Cursor end
+     * 
+     */
+    Byte R11;
+
+    /**
+     * @brief Display start address (High)
+     * 
+     */
+    Byte R12;
+
+    /**
+     * @brief Display start adress (Low)
+     * 
+     */
+    Byte R13;
+
+    /**
+     * @brief Cursor address (High)
+     * 
+     */
+    Byte R14;
+
+    /**
+     * @brief Cursor address (Low)
+     * 
+     */
+    Byte R15;
+
+    /**
+     * @brief Light pen (High)
+     * 
+     */
+    Byte R16;
+
+    /**
+     * @brief Light pen (Low)
+     * 
+     */
+    Byte R17;
+
+    /**
+     * @brief HCC (Horizontal Char Counter)
+     * 
+     */
+    Byte C0;
+
+    /**
+     * @brief VLC (Vertical Line Counter)
+     * 
+     */
+
+    /**
+     * @brief VLC (Vertical Line Counter)
+     * 
+     */
+    Byte C9;
+
+    /**
+     * @brief VCC (Vertical Character Counter)
+     * 
+     */
+    Byte C4;
+
+    /**
+     * @brief VSC (Vertical Sync Counter)
+     * 
+     */
+    Byte C3v; // VSC (Vertical Sync Counter)
+
+    /**
+     * @brief HSC (Horizontal Sync Counter)
+     * 
+     */
+    Byte C3h;
+
+    /**
+     * @brief VTAC (Vertical Total Adjust Counter)
+     * 
+     */
+    Byte C5;
+
+    /**
+     * @brief Video Memory Pointer
+     * 
+     */
+    Word VMA;
+    Word VMA2; // Byte Pointer
+
+    bool VSYNC; // VSync Signal
+    bool HSYNC; // HSync Signal
+    
+    /**
+     * @brief Draw Border when off
+     *        Else Draw Video Memory
+     */
+    bool DISPEN;
+
+    Word X,Y;
+
+    
 };
 
 #endif

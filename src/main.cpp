@@ -11,7 +11,7 @@ int main()
     window.setFramerateLimit(60);
     window.setVerticalSyncEnabled(true);
     // Start Emulator Thread
-    Loop.Start();
+    Loop.start();
     while (window.isOpen())
     {
         for (auto event = sf::Event{}; window.pollEvent(event);)
@@ -23,5 +23,5 @@ int main()
         }
         MainLoop.getCRT().RenderScreen(window);
     }
-    Loop.Stop();
+    Loop.stop();
 }
