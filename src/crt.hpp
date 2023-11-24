@@ -6,6 +6,7 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Graphics/Image.hpp>
 #include <SFML/Graphics/Font.hpp>
+#include <array>
 #include <mutex>
 
 using namespace m6502;
@@ -47,9 +48,10 @@ protected:
     void onProcess(const period& pInterval);
 
 private:
-    sf::Color PALETTE[27];
-    sf::Color PEN[16];
+    std::array<sf::Color,27> PALETTE;
+    std::array<sf::Color,16> PEN;
     sf::Color PAPER;
+    sf::Color BORDER;
     bool _debug;
     Word _videoMem;
     Word _videoPtr;

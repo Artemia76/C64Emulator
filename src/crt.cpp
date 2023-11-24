@@ -37,7 +37,7 @@ CCRT::CCRT(CBus& pBus, CLoop& pLoop) : CBusChip(pBus, 0xFFFF, 0), CProcessEvent(
     DISPEN = false;
     X=Y=0;
     //Init SFML
-    _screen.create(CRT_COL,CRT_LINES*2,sf::Color::Blue);
+    _screen.create(CRT_COL,CRT_LINES*2,sf::Color::Black);
     if (!_font.loadFromFile("assets/fonts/OpenSans-Regular.ttf"))
     {
         std::cout << "Error loading SFML Font" << std::endl;
@@ -46,19 +46,26 @@ CCRT::CCRT(CBus& pBus, CLoop& pLoop) : CBusChip(pBus, 0xFFFF, 0), CProcessEvent(
     _clock = 1000000; // Set Clock speed in Hz
     Byte R,V,B;
     R=V=B=0;
-    for (Byte i=0 ; i< sizeof(PALETTE); i++)
+    for (Byte i=0 ; i< PALETTE.size(); i++)
     {
         PALETTE[i] = sf::Color(R,V,B);
-        if (R==0xFF && B==0xFF)
+        if (R==0xFE && B==0xFE)
         {
             V+=0x7F;
-        }
-        if (B==0xFF) R+=0x7F;
-        if (B==0xFF) B=0;
+            R=0;
+            B=0;
+        } else
+        if (B==0xFE)
+        {
+            R+=0x7F;
+            B=0;
+        } else
+        B += 0x7F;
     }
     PEN[0] = PALETTE[1];
     PEN[1] = PALETTE[24];
     PAPER = PALETTE[1];
+    BORDER = PALETTE[15];
 }
 
 CCRT::~CCRT()
@@ -113,11 +120,9 @@ void CCRT::Execute()
     if (C0 == R0) // = 63 Width of screen in char
     {
         C0 = 0;
-        C9++;
         if (C9 == R9) // = 7 (CRT Char)
         {
             C9 = 0;
-            C4++;
             if (C4 == R4) // = 38 Height of screen in char
             {
                 if (C5 == R5) // = 0 Additional scan line
@@ -131,46 +136,63 @@ void CCRT::Execute()
                     C5++;
                 }
             }
+            else
+            {
+                C4++;
+            }
+        }
+        else
+        {
+            C9++;
         }
     }
     //draw screen
     X = C0 * 8;
-    Y = C4 * (R9+1) + C9;
-    sf::Color ColToDraw=PAPER;
-    for (Byte j = 0 ; j < 2; j++)
+    Y = 2*(C4 * (R9+1) + C9);
+    if (DISPEN)
     {
-        Byte Px = CBusChip::bus.readBusData(VMA+j);
-        switch (_mode)
+        sf::Color ColToDraw=PAPER;
+        for (Byte j = 0 ; j < 2; j++)
         {
-            case 2:
+            Byte Px = CBusChip::bus.readBusData(VMA+j);
+            switch (_mode)
             {
-                for (Byte i = 0 ; i <8; i++)
+                case 2:
                 {
-                    ColToDraw = PEN[(Px >> i)&0x01];
-                    _screen.setPixel(X+(j*8)+i, Y,ColToDraw);
-                }
-            } break;
-            case 1:
-            {
-                for (Byte i = 0 ; i <4; i++)
+                    for (Byte i = 0 ; i <8; i++)
+                    {
+                        ColToDraw = PEN[(Px >> i)&0x01];
+                        _screen.setPixel(X+(j*8)+i, Y,ColToDraw);
+                    }
+                } break;
+                case 1:
                 {
-                    ColToDraw = PEN[(Px >> (i*2))&0x03];
-                    _screen.setPixel(X+(j*4)+i, Y,ColToDraw);
-                    _screen.setPixel(X+(j*4)+i+1, Y,ColToDraw);
-                }
-            } break;
-            default:
-            {
-                for (Byte i = 0 ; i <2; i++)
+                    for (Byte i = 0 ; i <4; i++)
+                    {
+                        ColToDraw = PEN[(Px >> (i*2))&0x03];
+                        _screen.setPixel(X+(j*4)+i, Y,ColToDraw);
+                        _screen.setPixel(X+(j*4)+i+1, Y,ColToDraw);
+                    }
+                } break;
+                default:
                 {
-                    ColToDraw = PEN[(Px >> (i*4))&0x0F];
-                    _screen.setPixel(X+(j*8)+i, Y,ColToDraw);
-                    _screen.setPixel(X+(j*8)+i+1, Y,ColToDraw);
-                    _screen.setPixel(X+(j*8)+i+2, Y,ColToDraw);
-                    _screen.setPixel(X+(j*8)+i+3, Y,ColToDraw);
-                }
+                    for (Byte i = 0 ; i <2; i++)
+                    {
+                        ColToDraw = PEN[(Px >> (i*4))&0x0F];
+                        _screen.setPixel(X+(j*8)+i, Y,ColToDraw);
+                        _screen.setPixel(X+(j*8)+i+1, Y,ColToDraw);
+                        _screen.setPixel(X+(j*8)+i+2, Y,ColToDraw);
+                        _screen.setPixel(X+(j*8)+i+3, Y,ColToDraw);
+                    }
 
+                }
             }
+        }
+    } else
+    {
+         for (Byte i = 0 ; i <16; i++)
+        {
+            _screen.setPixel(X+i, Y,BORDER);
         }
     }
 }
@@ -197,9 +219,9 @@ void CCRT::RenderScreen(sf::RenderWindow& pWindow)
             << ",C9="
             << std::setfill('0') << std::setw(2)
             << static_cast<int>(C9)
-            << ",C4="
-            << std::setfill('0') << std::setw(2)
-            << static_cast<int>(C4);
+            << ",VMA="
+            << std::setfill('0') << std::setw(4) << std::setbase(16)
+            << VMA;
         // set the string to display
         text.setString(dbg_mess.str());
 
