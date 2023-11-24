@@ -57,6 +57,7 @@ private:
     Word _videoPtr;
     int _mode; // Curent video mode
     sf::Image _screen;
+    sf::Image _black;
     sf::Font _font;
 
     int _line; // Actual line
