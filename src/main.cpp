@@ -8,7 +8,7 @@ int main()
     CLoop Loop;
     CMainApp MainLoop(Loop);
     auto window = sf::RenderWindow{ { CRT_COL, CRT_LINES }, "CMake SFML Project" };
-    window.setFramerateLimit(60);
+    window.setFramerateLimit(50);
     window.setVerticalSyncEnabled(true);
     // Start Emulator Thread
     Loop.start();
