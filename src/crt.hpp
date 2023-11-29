@@ -12,7 +12,7 @@
 using namespace m6502;
 
 #define CRT_LINES 312
-#define CRT_COL 512
+#define CRT_COL 400
 
 /**
  * @brief Emulate CRTC 6845 and CRT Display

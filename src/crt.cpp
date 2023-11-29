@@ -35,6 +35,7 @@ CCRT::CCRT(CBus& pBus, CLoop& pLoop) : CBusChip(pBus, 0xFFFF, 0), CProcessEvent(
     VMA = R12;
     VMA = (R12 << 8) | R13;
     DISPEN = false;
+    VSYNC = HSYNC = false;
     X=Y=0;
     //Init SFML
     _screen.create(CRT_COL,CRT_LINES*2,sf::Color::Black);
@@ -44,7 +45,7 @@ CCRT::CCRT(CBus& pBus, CLoop& pLoop) : CBusChip(pBus, 0xFFFF, 0), CProcessEvent(
         std::cout << "Error loading SFML Font" << std::endl;
     }
     _debug = false;
-    _clock = 1000000; // Set Clock speed in Hz
+    _clock = 1; // Set Clock speed in Hz
     Byte R,V,B;
     R=V=B=0;
     for (Byte i=0 ; i< PALETTE.size(); i++)
@@ -88,6 +89,7 @@ void CCRT::Execute()
     }
     if (HSYNC)
     {
+        X=0;
         if((R3 & 0x0F)>0)
         {
             C3h ++;
@@ -95,25 +97,32 @@ void CCRT::Execute()
         if (C3h == (R3 & 0x0F)) // = 14 
         {
             HSYNC = false;
+            Y+=1;
         }
     }
-    //Vertical Sync
-    if (C4 == R7) // = 30 Start of VSync
+    else
     {
-        VSYNC = true;
-        _screen = _black;
-        C3v=0;
+        X +=8;
     }
     if (VSYNC)
     {
+        Y=0;
         C3v++;
-        if (C3v == ((R1 & 0xF0)>>4))
+        if (C3v == ((R3 & 0xF0)>>4))
         {
             VSYNC=false;
-            _screen=_black;
         }
     }
-
+    else
+    {
+        if (C4 == R7) // = 30 Start of VSync
+        {
+            VSYNC = true;
+            _screen = _black;
+            C3v=0;
+        }
+    }
+    VMA2 = (VMA & 0xC7FF) ^ (static_cast<Word>(C9 & 0x07)<<11);
     if (DISPEN)
     {
         VMA += 2 ;
@@ -149,9 +158,6 @@ void CCRT::Execute()
             C9++;
         }
     }
-    //draw screen
-    X = C0 * 8;
-    Y = 2*(C4 * (R9+1) + C9);
     if (DISPEN)
     {
         sf::Color ColToDraw=PAPER;
@@ -219,12 +225,12 @@ void CCRT::RenderScreen(sf::RenderWindow& pWindow)
             << "C0="
             << std::setfill('0') << std::setw(2)
             << static_cast<int>(C0)
-            << ",C9="
+            << ",C4="
             << std::setfill('0') << std::setw(2)
-            << static_cast<int>(C9)
+            << static_cast<int>(C4)
             << ",VMA="
             << std::setfill('0') << std::setw(4) << std::setbase(16)
-            << VMA;
+            << VMA2;
         // set the string to display
         text.setString(dbg_mess.str());
 
