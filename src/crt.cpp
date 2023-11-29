@@ -38,6 +38,7 @@ CCRT::CCRT(CBus& pBus, CLoop& pLoop) : CBusChip(pBus, 0xFFFF, 0), CProcessEvent(
     X=Y=0;
     //Init SFML
     _screen.create(CRT_COL,CRT_LINES*2,sf::Color::Black);
+    _black=_screen;
     if (!_font.loadFromFile("assets/fonts/OpenSans-Regular.ttf"))
     {
         std::cout << "Error loading SFML Font" << std::endl;
@@ -108,6 +109,7 @@ void CCRT::Execute()
         if (C3v == ((R1 & 0xF0)>>4))
         {
             VSYNC=false;
+            _screen=_black;
         }
     }
 
