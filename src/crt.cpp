@@ -45,7 +45,7 @@ CCRT::CCRT(CBus& pBus, CLoop& pLoop) : CBusChip(pBus, 0xFFFF, 0), CProcessEvent(
         std::cout << "Error loading SFML Font" << std::endl;
     }
     _debug = false;
-    _clock = 1; // Set Clock speed in Hz
+    _clock = 1000000; // Set Clock speed in Hz
     Byte R,V,B;
     R=V=B=0;
     for (Byte i=0 ; i< PALETTE.size(); i++)
